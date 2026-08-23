@@ -3,9 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const searchParams = useSearchParams();
 
   const beat = searchParams.get("beat") || "UNKNOWN BEAT";
@@ -92,7 +92,6 @@ export default function CheckoutPage() {
 
   return (
     <main className="min-h-screen bg-black px-5 py-16 text-white sm:px-8 lg:px-12">
-
       <div className="mx-auto max-w-6xl">
 
         {/* HEADER */}
@@ -119,7 +118,6 @@ export default function CheckoutPage() {
           </p>
 
         </div>
-
 
         {/* PROGRESS */}
 
@@ -159,22 +157,17 @@ export default function CheckoutPage() {
 
         </div>
 
-
         {/* MAIN GRID */}
 
         <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-
 
           {/* LEFT SIDE */}
 
           <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03] p-7 backdrop-blur-2xl sm:p-9">
 
-            {/* RED AMBIENT */}
-
             <div className="pointer-events-none absolute -right-32 -top-32 h-72 w-72 rounded-full bg-red-700/10 blur-[100px]" />
 
             <div className="relative z-10">
-
 
               {/* STEP 1 */}
 
@@ -197,9 +190,6 @@ export default function CheckoutPage() {
                     Enter your email and we'll use it for your order and
                     digital delivery.
                   </p>
-
-
-                  {/* EMAIL */}
 
                   <div className="mt-8">
 
@@ -225,17 +215,11 @@ export default function CheckoutPage() {
 
                   </div>
 
-
-                  {/* ERROR */}
-
                   {error && (
                     <div className="mt-5 rounded-xl border border-red-500/20 bg-red-500/[0.06] px-4 py-3 text-xs text-red-400">
                       {error}
                     </div>
                   )}
-
-
-                  {/* CONTINUE */}
 
                   <button
                     type="submit"
@@ -247,7 +231,6 @@ export default function CheckoutPage() {
                 </form>
 
               )}
-
 
               {/* STEP 2 */}
 
@@ -269,7 +252,6 @@ export default function CheckoutPage() {
                     ← BACK
                   </button>
 
-
                   <p className="text-[10px] tracking-[0.3em] text-red-500">
                     STEP 02
                   </p>
@@ -281,7 +263,6 @@ export default function CheckoutPage() {
                   <p className="mt-3 text-sm text-zinc-600">
                     Paying for {beat} — {license}.
                   </p>
-
 
                   {/* CARD PREVIEW */}
 
@@ -329,7 +310,6 @@ export default function CheckoutPage() {
 
                   </div>
 
-
                   {/* CARD INFORMATION */}
 
                   <div className="mt-8">
@@ -348,7 +328,6 @@ export default function CheckoutPage() {
                       placeholder="1234 5678 9012 3456"
                       className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3.5 text-sm tracking-wider text-white outline-none transition placeholder:text-zinc-700 focus:border-red-500/50"
                     />
-
 
                     <div className="mt-3 grid grid-cols-2 gap-3">
 
@@ -370,7 +349,6 @@ export default function CheckoutPage() {
                         />
 
                       </div>
-
 
                       <div>
 
@@ -394,9 +372,6 @@ export default function CheckoutPage() {
 
                     </div>
 
-
-                    {/* NAME */}
-
                     <label className="mt-4 block text-xs text-zinc-400">
                       NAME ON CARD
                     </label>
@@ -411,17 +386,11 @@ export default function CheckoutPage() {
 
                   </div>
 
-
-                  {/* ERROR */}
-
                   {error && (
                     <div className="mt-5 rounded-xl border border-red-500/20 bg-red-500/[0.06] px-4 py-3 text-xs text-red-400">
                       {error}
                     </div>
                   )}
-
-
-                  {/* PAY */}
 
                   <button
                     type="submit"
@@ -432,7 +401,6 @@ export default function CheckoutPage() {
                       ? "PROCESSING..."
                       : `PAY $${price}`}
                   </button>
-
 
                   <div className="mt-5 text-center text-[10px] tracking-wide text-zinc-600">
                     🔒 SECURE PAYMENT • DIGITAL DELIVERY
@@ -446,14 +414,9 @@ export default function CheckoutPage() {
 
           </div>
 
-
-          {/* =================================================
-              ORDER SUMMARY
-          ================================================= */}
+          {/* ORDER SUMMARY */}
 
           <aside className="h-fit overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03] backdrop-blur-2xl">
-
-            {/* COVER */}
 
             <div className="relative aspect-video w-full">
 
@@ -481,15 +444,11 @@ export default function CheckoutPage() {
 
             </div>
 
-
-            {/* SUMMARY */}
-
             <div className="p-7">
 
               <p className="text-[10px] tracking-[0.3em] text-zinc-500">
                 ORDER SUMMARY
               </p>
-
 
               <div className="mt-6 flex items-center justify-between">
 
@@ -511,11 +470,7 @@ export default function CheckoutPage() {
 
               </div>
 
-
               <div className="my-6 h-px bg-white/10" />
-
-
-              {/* LICENSE */}
 
               <div className="flex items-center justify-between">
 
@@ -528,9 +483,6 @@ export default function CheckoutPage() {
                 </span>
 
               </div>
-
-
-              {/* EMAIL */}
 
               {email && (
 
@@ -548,9 +500,6 @@ export default function CheckoutPage() {
 
               )}
 
-
-              {/* TOTAL */}
-
               <div className="mt-7 flex items-end justify-between">
 
                 <span className="text-xs tracking-[0.2em] text-zinc-500">
@@ -562,9 +511,6 @@ export default function CheckoutPage() {
                 </span>
 
               </div>
-
-
-              {/* DELIVERY */}
 
               <div className="mt-7 rounded-xl border border-white/10 bg-white/[0.03] p-4">
 
@@ -587,5 +533,27 @@ export default function CheckoutPage() {
       </div>
 
     </main>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-black text-white">
+          <div className="text-center">
+            <p className="text-[10px] tracking-[0.35em] text-red-500">
+              RASHEDBEATS
+            </p>
+
+            <p className="mt-3 text-sm text-zinc-600">
+              LOADING CHECKOUT...
+            </p>
+          </div>
+        </main>
+      }
+    >
+      <CheckoutContent />
+    </Suspense>
   );
 }
