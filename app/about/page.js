@@ -1,6 +1,5 @@
-"use client";
-
 import Image from "next/image";
+import Link from "next/link";
 
 const youtubeVideos = [
   {
@@ -38,28 +37,28 @@ export default function AboutPage() {
 
       <nav className="glass-nav relative z-30 mx-auto mt-5 flex w-[92%] max-w-5xl items-center justify-between rounded-full px-6 py-4 sm:px-8">
 
-        <a
+        <Link
           href="/"
           className="relative z-10 text-lg font-bold tracking-[0.25em] transition hover:text-red-400"
         >
           RASHED
-        </a>
+        </Link>
 
         <div className="relative z-10 flex items-center gap-2 sm:gap-3">
 
-          <a
+          <Link
             href="/#beats"
             className="rounded-full px-4 py-2 text-xs tracking-[0.2em] text-zinc-400 transition hover:text-white"
           >
             BEATS
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/about"
             className="rounded-full bg-white/[0.06] px-4 py-2 text-xs tracking-[0.2em] text-white"
           >
             ABOUT
-          </a>
+          </Link>
 
         </div>
 
@@ -153,7 +152,8 @@ export default function AboutPage() {
                   src="/about.jpg"
                   alt="Rashed"
                   fill
-                  priority
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 430px"
+                  quality={80}
                   className="object-cover grayscale transition duration-700 group-hover:scale-105 group-hover:grayscale-0"
                 />
 
@@ -318,14 +318,14 @@ export default function AboutPage() {
             </div>
 
 
-            <a
+            <Link
               href="https://www.youtube.com/@Rashedd.jr1"
               target="_blank"
               rel="noreferrer"
               className="text-[9px] tracking-[0.3em] text-zinc-600 transition hover:text-red-400"
             >
               VIEW CHANNEL →
-            </a>
+            </Link>
 
           </div>
 
@@ -373,14 +373,27 @@ export default function AboutPage() {
 
                   <div className="relative aspect-video overflow-hidden rounded-[22px] bg-black">
 
-                    <iframe
-                      className="absolute inset-0 h-full w-full"
-                      src={`https://www.youtube.com/embed/${video.id}`}
-                      title={video.title}
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                    />
+                    <Link
+                      href={`https://www.youtube.com/watch?v=${video.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="absolute inset-0 block"
+                      aria-label={`Open ${video.title} on YouTube`}
+                    >
+                      <Image
+                        src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
+                        alt={video.title}
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                        className="object-cover transition duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/20" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white/30 bg-black/50 text-xl text-white shadow-[0_0_30px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+                          ▶
+                        </div>
+                      </div>
+                    </Link>
 
                   </div>
 
@@ -421,14 +434,14 @@ export default function AboutPage() {
                         RASHED / YOUTUBE
                       </span>
 
-                      <a
+                      <Link
                         href={`https://www.youtube.com/watch?v=${video.id}`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-[8px] tracking-[0.25em] text-zinc-500 transition hover:text-red-400"
                       >
                         OPEN →
-                      </a>
+                      </Link>
 
                     </div>
 
@@ -484,7 +497,7 @@ export default function AboutPage() {
 
             {/* BEATS */}
 
-            <a
+            <Link
               href="/#beats"
               className="group relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl transition duration-500 hover:-translate-y-1 hover:border-red-500/25"
             >
@@ -511,12 +524,12 @@ export default function AboutPage() {
 
               </div>
 
-            </a>
+            </Link>
 
 
             {/* YOUTUBE */}
 
-            <a
+            <Link
               href="https://www.youtube.com/@Rashedd.jr1"
               target="_blank"
               rel="noreferrer"
@@ -546,7 +559,7 @@ export default function AboutPage() {
 
               </div>
 
-            </a>
+            </Link>
 
           </div>
 
@@ -580,28 +593,28 @@ export default function AboutPage() {
 
             <div className="flex gap-6">
 
-              <a
+              <Link
                 href="/"
                 className="text-[9px] tracking-[0.25em] text-zinc-600 transition hover:text-white"
               >
                 HOME
-              </a>
+              </Link>
 
-              <a
+              <Link
                 href="/#beats"
                 className="text-[9px] tracking-[0.25em] text-zinc-600 transition hover:text-white"
               >
                 BEATS
-              </a>
+              </Link>
 
-              <a
+              <Link
                 href="https://www.youtube.com/@Rashedd.jr1"
                 target="_blank"
                 rel="noreferrer"
                 className="text-[9px] tracking-[0.25em] text-zinc-600 transition hover:text-red-400"
               >
                 YOUTUBE
-              </a>
+              </Link>
 
             </div>
 
