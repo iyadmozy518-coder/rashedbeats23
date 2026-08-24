@@ -16,23 +16,57 @@ export default function BeatCard({
   onDetails,
 }) {
   return (
-    <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] p-4 backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:border-white/20">
-
+    <article
+      className="
+        group relative overflow-hidden rounded-2xl
+        border border-white/10
+        bg-white/[0.035]
+        p-4
+        transition-[transform,border-color,background-color]
+        duration-300
+        hover:-translate-y-2
+        hover:border-white/20
+      "
+    >
       {/* Cover */}
       <div className="relative aspect-square overflow-hidden rounded-xl">
-
         <Image
           src={cover}
           alt={`${title} beat cover`}
           fill
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="
+            object-cover
+            transition-transform
+            duration-500
+            group-hover:scale-105
+          "
         />
 
         {/* Dark overlay */}
-        <div className="absolute inset-0 bg-black/20 transition-colors duration-500 group-hover:bg-black/35" />
+        <div
+          className="
+            absolute inset-0
+            bg-black/20
+            transition-colors duration-300
+            group-hover:bg-black/35
+          "
+        />
 
         {/* Genre */}
-        <div className="absolute left-4 top-4 rounded-full border border-white/15 bg-black/30 px-3 py-1.5 text-[10px] font-medium tracking-[0.2em] text-white backdrop-blur-md">
+        <div
+          className="
+            absolute left-4 top-4
+            rounded-full
+            border border-white/15
+            bg-black/45
+            px-3 py-1.5
+            text-[10px]
+            font-medium
+            tracking-[0.2em]
+            text-white
+          "
+        >
           {genre}
         </div>
 
@@ -49,21 +83,30 @@ export default function BeatCard({
             })
           }
           aria-label={`Play ${title}`}
-          className="absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-black shadow-lg transition-all duration-300 hover:scale-110 hover:bg-zinc-200"
+          className="
+            absolute bottom-4 right-4
+            flex h-12 w-12
+            items-center justify-center
+            rounded-full
+            bg-white
+            text-black
+            shadow-lg
+            transition-transform
+            duration-200
+            hover:scale-110
+            active:scale-95
+          "
         >
           ▶
         </button>
-
       </div>
 
       {/* Info */}
       <div className="mt-5">
-
         {/* Title + Price */}
         <div className="flex items-start justify-between gap-4">
-
-          <div>
-            <h3 className="text-lg font-bold tracking-wide">
+          <div className="min-w-0">
+            <h3 className="truncate text-lg font-bold tracking-wide">
               {title}
             </h3>
 
@@ -72,10 +115,9 @@ export default function BeatCard({
             </p>
           </div>
 
-          <span className="text-sm font-semibold text-zinc-300">
+          <span className="shrink-0 text-sm font-semibold text-zinc-300">
             ${price}
           </span>
-
         </div>
 
         {/* Metadata */}
@@ -86,7 +128,6 @@ export default function BeatCard({
 
         {/* View Details */}
         <div className="mt-5 flex items-center justify-between">
-
           <button
             type="button"
             onClick={() =>
@@ -101,19 +142,29 @@ export default function BeatCard({
                 mood,
               })
             }
-            className="group/view flex items-center gap-2 text-xs font-medium tracking-[0.2em] text-zinc-400 transition-colors duration-300 hover:text-white"
+            className="
+              group/view
+              flex items-center gap-2
+              text-xs font-medium
+              tracking-[0.2em]
+              text-zinc-400
+              transition-colors duration-200
+              hover:text-white
+            "
           >
             VIEW DETAILS
 
-            <span className="transition-transform duration-300 group-hover/view:translate-x-1">
+            <span
+              className="
+                transition-transform duration-200
+                group-hover/view:translate-x-1
+              "
+            >
               →
             </span>
           </button>
-
         </div>
-
       </div>
-
     </article>
   );
 }
