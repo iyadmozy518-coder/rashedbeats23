@@ -290,6 +290,7 @@ export default function Home() {
             {beats.map((beat) => (
               <BeatCard
                 key={beat.id}
+                id={beat.id}
                 title={beat.title}
                 genre={beat.genre}
                 bpm={beat.bpm}

@@ -3,7 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { supabase } from "../../lib/supabase";
+
+const methods = [["instapay", "InstaPay"], ["vodafone_cash", "Vodafone Cash"], ["telda", "Telda"]];
 
 function formatEgp(value) {
   return `${Number(value).toLocaleString("en-US")} EGP`;
@@ -11,553 +14,96 @@ function formatEgp(value) {
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
-
+  const beatId = searchParams.get("beatId") || "";
   const beat = searchParams.get("beat") || "UNKNOWN BEAT";
-  const genre = searchParams.get("genre") || "UNKNOWN";
-  const cover = searchParams.get("cover") || "/beats/after-dark.jpg";
   const license = searchParams.get("license") || "PREMIUM";
-  const price = searchParams.get("price") || "3000";
-
-  const [step, setStep] = useState(1);
-
+  const displayPrice = searchParams.get("price") || "";
+  const cover = searchParams.get("cover") || "/beats/after-dark.jpg";
+  const [paymentSettings, setPaymentSettings] = useState(null);
+  const [method, setMethod] = useState("instapay");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [cardName, setCardName] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
-
+  const [phone, setPhone] = useState("");
+  const [proof, setProof] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [loadingSettings, setLoadingSettings] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [processing, setProcessing] = useState(false);
-
-  function continueToPayment(e) {
-    e.preventDefault();
-
-    setError("");
-
-    if (!email.includes("@") || !email.includes(".")) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-
-    setStep(2);
-  }
-
-  function formatCardNumber(value) {
-    const numbers = value.replace(/\D/g, "").slice(0, 16);
-
-    return numbers.replace(/(.{4})/g, "$1 ").trim();
-  }
-
-  function formatExpiry(value) {
-    const numbers = value.replace(/\D/g, "").slice(0, 4);
-
-    if (numbers.length > 2) {
-      return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
-    }
-
-    return numbers;
-  }
-
-  function payNow(e) {
-    e.preventDefault();
-
-    setError("");
-
-    if (cardName.trim().length < 2) {
-      setError("Please enter the name on the card.");
-      return;
-    }
-
-    if (cardNumber.replace(/\s/g, "").length < 16) {
-      setError("Please enter a valid card number.");
-      return;
-    }
-
-    if (expiry.length < 5) {
-      setError("Please enter a valid expiry date.");
-      return;
-    }
-
-    if (cvv.length < 3) {
-      setError("Please enter a valid CVV.");
-      return;
-    }
-
-    setProcessing(true);
-
-    setTimeout(() => {
-      setProcessing(false);
-
-      alert(
-        "Payment UI is working! The real payment gateway will be connected next."
-      );
-    }, 1500);
-  }
-
-  return (
-    <main className="min-h-screen bg-black px-5 py-16 text-white sm:px-8 lg:px-12">
-      <div className="mx-auto max-w-6xl">
-
-        {/* HEADER */}
-
-        <div className="mb-12">
-
-          <Link
-            href="/"
-            className="text-xs tracking-[0.25em] text-zinc-500 transition hover:text-white"
-          >
-            ← BACK TO STORE
-          </Link>
-
-          <p className="mt-10 text-[10px] tracking-[0.35em] text-red-500">
-            RASHEDBEATS
-          </p>
-
-          <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-            CHECKOUT
-          </h1>
-
-          <p className="mt-3 text-sm text-zinc-500">
-            Complete your purchase and get your beat instantly.
-          </p>
-
-        </div>
-
-        {/* PROGRESS */}
-
-        <div className="mb-8 flex items-center gap-3">
-
-          <div
-            className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all ${
-              step >= 1
-                ? "bg-white text-black"
-                : "bg-white/10 text-zinc-600"
-            }`}
-          >
-            1
-          </div>
-
-          <div
-            className={`h-px w-16 transition-all ${
-              step >= 2
-                ? "bg-red-500"
-                : "bg-white/10"
-            }`}
-          />
-
-          <div
-            className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all ${
-              step >= 2
-                ? "bg-white text-black"
-                : "bg-white/10 text-zinc-600"
-            }`}
-          >
-            2
-          </div>
-
-          <span className="ml-2 text-[10px] tracking-[0.2em] text-zinc-600">
-            {step === 1 ? "CUSTOMER INFO" : "PAYMENT"}
-          </span>
-
-        </div>
-
-        {/* MAIN GRID */}
-
-        <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-
-          {/* LEFT SIDE */}
-
-          <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03] p-7 backdrop-blur-2xl sm:p-9">
-
-            <div className="pointer-events-none absolute -right-32 -top-32 h-72 w-72 rounded-full bg-red-700/10 blur-[100px]" />
-
-            <div className="relative z-10">
-
-              {/* STEP 1 */}
-
-              {step === 1 && (
-
-                <form
-                  onSubmit={continueToPayment}
-                  className="animate-[fadeIn_0.4s_ease-out]"
-                >
-
-                  <p className="text-[10px] tracking-[0.3em] text-zinc-500">
-                    STEP 01
-                  </p>
-
-                  <h2 className="mt-2 text-2xl font-semibold">
-                    Where should we send your beat?
-                  </h2>
-
-                  <p className="mt-3 text-sm leading-6 text-zinc-600">
-                    Enter your email and we'll use it for your order and
-                    digital delivery.
-                  </p>
-
-                  <div className="mt-8">
-
-                    <label className="text-xs text-zinc-400">
-                      EMAIL ADDRESS
-                    </label>
-
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        setError("");
-                      }}
-                      placeholder="you@example.com"
-                      autoFocus
-                      className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-4 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-red-500/50 focus:bg-white/[0.04]"
-                    />
-
-                    <p className="mt-2 text-[10px] text-zinc-600">
-                      Your download link will be sent here.
-                    </p>
-
-                  </div>
-
-                  {error && (
-                    <div className="mt-5 rounded-xl border border-red-500/20 bg-red-500/[0.06] px-4 py-3 text-xs text-red-400">
-                      {error}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="mt-8 w-full rounded-xl bg-white px-5 py-4 text-sm font-semibold tracking-wide text-black transition-all duration-300 hover:bg-zinc-200 hover:shadow-[0_0_40px_rgba(255,255,255,0.12)]"
-                  >
-                    CONTINUE TO PAYMENT →
-                  </button>
-
-                </form>
-
-              )}
-
-              {/* STEP 2 */}
-
-              {step === 2 && (
-
-                <form
-                  onSubmit={payNow}
-                  className="animate-[fadeIn_0.4s_ease-out]"
-                >
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStep(1);
-                      setError("");
-                    }}
-                    className="mb-7 text-[10px] tracking-[0.2em] text-zinc-600 transition hover:text-white"
-                  >
-                    ← BACK
-                  </button>
-
-                  <p className="text-[10px] tracking-[0.3em] text-red-500">
-                    STEP 02
-                  </p>
-
-                  <h2 className="mt-2 text-2xl font-semibold">
-                    Payment details
-                  </h2>
-
-                  <p className="mt-3 text-sm text-zinc-600">
-                    Paying for {beat} — {license}.
-                  </p>
-
-                  {/* CARD PREVIEW */}
-
-                  <div className="mt-8 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-zinc-800 via-zinc-950 to-black p-6 shadow-2xl">
-
-                    <div className="flex items-start justify-between">
-
-                      <span className="text-[9px] tracking-[0.3em] text-zinc-500">
-                        RASHEDBEATS
-                      </span>
-
-                      <span className="text-xs text-zinc-600">
-                        CARD
-                      </span>
-
-                    </div>
-
-                    <div className="mt-10 text-lg tracking-[0.25em] text-zinc-300">
-                      {cardNumber || "•••• •••• •••• ••••"}
-                    </div>
-
-                    <div className="mt-6 flex justify-between">
-
-                      <div>
-                        <p className="text-[8px] tracking-[0.2em] text-zinc-600">
-                          CARD HOLDER
-                        </p>
-
-                        <p className="mt-1 text-xs uppercase text-zinc-400">
-                          {cardName || "YOUR NAME"}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-[8px] tracking-[0.2em] text-zinc-600">
-                          EXPIRES
-                        </p>
-
-                        <p className="mt-1 text-xs text-zinc-400">
-                          {expiry || "MM/YY"}
-                        </p>
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                  {/* CARD INFORMATION */}
-
-                  <div className="mt-8">
-
-                    <label className="text-xs text-zinc-400">
-                      CARD NUMBER
-                    </label>
-
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={cardNumber}
-                      onChange={(e) =>
-                        setCardNumber(formatCardNumber(e.target.value))
-                      }
-                      placeholder="1234 5678 9012 3456"
-                      className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3.5 text-sm tracking-wider text-white outline-none transition placeholder:text-zinc-700 focus:border-red-500/50"
-                    />
-
-                    <div className="mt-3 grid grid-cols-2 gap-3">
-
-                      <div>
-
-                        <label className="text-xs text-zinc-400">
-                          EXPIRY
-                        </label>
-
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          value={expiry}
-                          onChange={(e) =>
-                            setExpiry(formatExpiry(e.target.value))
-                          }
-                          placeholder="MM/YY"
-                          className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-red-500/50"
-                        />
-
-                      </div>
-
-                      <div>
-
-                        <label className="text-xs text-zinc-400">
-                          CVV
-                        </label>
-
-                        <input
-                          type="password"
-                          inputMode="numeric"
-                          maxLength={4}
-                          value={cvv}
-                          onChange={(e) =>
-                            setCvv(e.target.value.replace(/\D/g, ""))
-                          }
-                          placeholder="•••"
-                          className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-red-500/50"
-                        />
-
-                      </div>
-
-                    </div>
-
-                    <label className="mt-4 block text-xs text-zinc-400">
-                      NAME ON CARD
-                    </label>
-
-                    <input
-                      type="text"
-                      value={cardName}
-                      onChange={(e) => setCardName(e.target.value)}
-                      placeholder="Rashed"
-                      className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-red-500/50"
-                    />
-
-                  </div>
-
-                  {error && (
-                    <div className="mt-5 rounded-xl border border-red-500/20 bg-red-500/[0.06] px-4 py-3 text-xs text-red-400">
-                      {error}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={processing}
-                    className="mt-8 w-full rounded-xl bg-white px-5 py-4 text-sm font-semibold tracking-wide text-black transition-all duration-300 hover:bg-zinc-200 hover:shadow-[0_0_40px_rgba(255,255,255,0.12)] disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {processing
-                      ? "PROCESSING..."
-                      : `PAY ${formatEgp(price)}`}
-                  </button>
-
-                  <div className="mt-5 text-center text-[10px] tracking-wide text-zinc-600">
-                    🔒 SECURE PAYMENT • DIGITAL DELIVERY
-                  </div>
-
-                </form>
-
-              )}
-
-            </div>
-
-          </div>
-
-          {/* ORDER SUMMARY */}
-
-          <aside className="h-fit overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03] backdrop-blur-2xl">
-
-            <div className="relative aspect-video w-full">
-
-              <Image
-                src={cover}
-                alt={beat}
-                fill
-                className="object-cover"
-                priority
-              />
-
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-
-              <div className="absolute bottom-5 left-5">
-
-                <p className="text-[9px] tracking-[0.3em] text-zinc-400">
-                  BEAT
-                </p>
-
-                <h2 className="mt-1 text-xl font-bold">
-                  {beat}
-                </h2>
-
-              </div>
-
-            </div>
-
-            <div className="p-7">
-
-              <p className="text-[10px] tracking-[0.3em] text-zinc-500">
-                ORDER SUMMARY
-              </p>
-
-              <div className="mt-6 flex items-center justify-between">
-
-                <div>
-
-                  <p className="text-sm font-semibold">
-                    {beat}
-                  </p>
-
-                  <p className="mt-1 text-xs text-zinc-500">
-                    {genre}
-                  </p>
-
-                </div>
-
-                <span className="text-sm text-zinc-300">
-                  {formatEgp(price)}
-                </span>
-
-              </div>
-
-              <div className="my-6 h-px bg-white/10" />
-
-              <div className="flex items-center justify-between">
-
-                <span className="text-xs text-zinc-500">
-                  LICENSE
-                </span>
-
-                <span className="rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1 text-[10px] font-semibold text-red-400">
-                  {license}
-                </span>
-
-              </div>
-
-              {email && (
-
-                <div className="mt-5 flex items-center justify-between">
-
-                  <span className="text-xs text-zinc-500">
-                    EMAIL
-                  </span>
-
-                  <span className="max-w-[190px] truncate text-xs text-zinc-400">
-                    {email}
-                  </span>
-
-                </div>
-
-              )}
-
-              <div className="mt-7 flex items-end justify-between">
-
-                <span className="text-xs tracking-[0.2em] text-zinc-500">
-                  TOTAL
-                </span>
-
-                <span className="text-3xl font-bold">
-                  {formatEgp(price)}
-                </span>
-
-              </div>
-
-              <div className="mt-7 rounded-xl border border-white/10 bg-white/[0.03] p-4">
-
-                <p className="text-xs font-semibold text-zinc-300">
-                  INSTANT DIGITAL DELIVERY
-                </p>
-
-                <p className="mt-2 text-[11px] leading-5 text-zinc-600">
-                  Your licensed beat files will be delivered digitally after successful payment.
-                </p>
-
-              </div>
-
-            </div>
-
-          </aside>
-
-        </div>
-
-      </div>
-
-    </main>
-  );
-}
-
-export default function CheckoutPage() {
-  return (
-    <Suspense
-      fallback={
-        <main className="flex min-h-screen items-center justify-center bg-black text-white">
-          <div className="text-center">
-            <p className="text-[10px] tracking-[0.35em] text-red-500">
-              RASHEDBEATS
-            </p>
-
-            <p className="mt-3 text-sm text-zinc-600">
-              LOADING CHECKOUT...
-            </p>
-          </div>
-        </main>
+  const [success, setSuccess] = useState(null);
+
+  useEffect(() => {
+    async function loadSettings() {
+      const { data, error: settingsError } = await supabase.rpc("get_checkout_payment_settings");
+      if (settingsError) {
+        console.error("Payment settings error:", settingsError);
+        setError("Payment details are temporarily unavailable.");
+      } else {
+        setPaymentSettings(data || {});
       }
-    >
-      <CheckoutContent />
-    </Suspense>
-  );
+      setLoadingSettings(false);
+    }
+    loadSettings();
+  }, []);
+
+  const selectedMethod = paymentSettings?.[method] || {};
+  const hasPaymentDetails = Boolean(selectedMethod.account);
+
+  async function copyAccount() {
+    if (!selectedMethod.account) return;
+    await navigator.clipboard.writeText(selectedMethod.account);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1600);
+  }
+
+  function selectProof(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp", "application/pdf"].includes(file.type) || file.size > 10 * 1024 * 1024) {
+      setError("Upload a JPG, PNG, WEBP, or PDF smaller than 10 MB.");
+      return;
+    }
+    setError("");
+    setProof(file);
+  }
+
+  async function submitOrder(event) {
+    event.preventDefault();
+    setError("");
+    if (!beatId) return setError("This checkout link is missing the beat identity.");
+    if (name.trim().length < 2) return setError("Enter your full name.");
+    if (!email.includes("@") || !email.includes(".")) return setError("Enter a valid email address.");
+    if (!hasPaymentDetails) return setError("This payment method is currently unavailable.");
+    if (!proof) return setError("Upload your payment proof before submitting.");
+
+    setSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append("beatId", beatId);
+      formData.append("license", license);
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("phone", phone);
+      formData.append("paymentMethod", method);
+      formData.append("proof", proof);
+      const response = await fetch("/api/orders", { method: "POST", body: formData });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      setSuccess(result.order);
+    } catch (submitError) {
+      console.error("Checkout submission failed:", submitError);
+      setError("We could not submit your order. Please check your details and try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (success) {
+    return <main className="min-h-screen bg-black px-5 py-16 text-white sm:px-8 lg:px-12"><div className="mx-auto max-w-2xl"><p className="text-[10px] tracking-[0.35em] text-red-500">RASHEDBEATS / ORDER RECEIVED</p><h1 className="mt-4 text-4xl font-bold">PENDING VERIFICATION</h1><p className="mt-4 text-sm leading-7 text-zinc-500">Your payment is being reviewed. You will receive access to your files once the payment is confirmed.</p><div className="mt-10 rounded-[28px] border border-white/10 bg-white/[0.03] p-7 sm:p-9"><Detail label="ORDER REFERENCE" value={success.order_reference} /><Detail label="BEAT" value={success.beat_title} /><Detail label="LICENSE" value={success.selected_license} /><Detail label="AMOUNT" value={formatEgp(success.amount)} /><Detail label="PAYMENT METHOD" value={method.replace("_", " ").toUpperCase()} /><Detail label="STATUS" value="PENDING" /></div><Link href={`/order/${success.order_reference}?token=${success.access_token}`} className="mt-7 inline-flex rounded-full bg-white px-7 py-4 text-xs font-semibold tracking-[0.2em] text-black">VIEW ORDER STATUS</Link></div></main>;
+  }
+
+  return <main className="min-h-screen bg-black px-5 py-16 text-white sm:px-8 lg:px-12"><div className="mx-auto max-w-6xl"><Link href="/" className="text-xs tracking-[0.25em] text-zinc-500 hover:text-white">BACK TO STORE</Link><p className="mt-10 text-[10px] tracking-[0.35em] text-red-500">RASHEDBEATS / CHECKOUT</p><h1 className="mt-3 text-4xl font-bold">MANUAL PAYMENT</h1><p className="mt-3 text-sm text-zinc-500">Complete the transfer, upload your proof, and submit the order for review.</p><form onSubmit={submitOrder} className="mt-10 grid gap-6 lg:grid-cols-[1fr_360px]"><section className="rounded-[28px] border border-white/10 bg-white/[0.03] p-7 sm:p-9"><h2 className="text-2xl font-semibold">Customer details</h2><div className="mt-7 space-y-5"><Field label="FULL NAME" value={name} onChange={setName} placeholder="Your full name" /><Field label="EMAIL ADDRESS" value={email} onChange={setEmail} placeholder="you@example.com" type="email" /><Field label="PHONE (OPTIONAL)" value={phone} onChange={setPhone} placeholder="01xxxxxxxxx" /></div><h2 className="mt-10 text-2xl font-semibold">Payment method</h2><div className="mt-5 grid gap-3 sm:grid-cols-3">{methods.map(([id, label]) => { const configured = Boolean(paymentSettings?.[id]?.account); return <button type="button" key={id} disabled={!configured || loadingSettings} onClick={() => setMethod(id)} className={`rounded-2xl border p-4 text-left transition ${method === id ? "border-red-500/60 bg-red-500/[0.08]" : "border-white/10 bg-black/20"} disabled:cursor-not-allowed disabled:opacity-40`}><span className="text-sm font-semibold">{label}</span><span className="mt-2 block text-[9px] tracking-[0.15em] text-zinc-600">{configured ? "AVAILABLE" : "NOT CONFIGURED"}</span></button>; })}</div><div className="mt-5 rounded-2xl border border-white/10 bg-black/25 p-5">{loadingSettings ? <p className="text-xs text-zinc-500">LOADING PAYMENT DETAILS...</p> : hasPaymentDetails ? <><p className="text-[9px] tracking-[0.25em] text-red-400">{selectedMethod.display_name || methods.find(([id]) => id === method)?.[1]}</p><div className="mt-3 flex items-center justify-between gap-3"><p className="break-all text-lg font-semibold">{selectedMethod.account}</p><button type="button" onClick={copyAccount} className="shrink-0 rounded-full border border-white/10 px-3 py-2 text-[9px] tracking-[0.15em] text-zinc-400">{copied ? "COPIED" : "COPY"}</button></div>{selectedMethod.instructions && <p className="mt-4 whitespace-pre-line text-sm leading-6 text-zinc-500">{selectedMethod.instructions}</p>}</> : <p className="text-sm text-zinc-500">This payment method is currently unavailable.</p>}</div><h2 className="mt-10 text-2xl font-semibold">Payment proof</h2><label className="mt-5 flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-dashed border-white/15 bg-black/20 p-5"><span className="min-w-0"><span className="block text-sm font-semibold">{proof ? proof.name : "Upload transfer screenshot or PDF"}</span><span className="mt-2 block text-xs text-zinc-600">Maximum 10 MB</span></span><span className="shrink-0 rounded-full bg-white px-4 py-2 text-[9px] font-semibold tracking-[0.15em] text-black">CHOOSE FILE</span><input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={selectProof} className="hidden" /></label>{error && <p className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/[0.06] p-4 text-sm text-red-300">{error}</p>}<button type="submit" disabled={submitting || loadingSettings || !hasPaymentDetails} className="mt-7 w-full rounded-xl bg-white px-5 py-4 text-sm font-semibold tracking-wide text-black disabled:cursor-not-allowed disabled:opacity-50">{submitting ? "SUBMITTING ORDER..." : "I&apos;VE PAID / SUBMIT ORDER"}</button></section><aside className="h-fit overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03]"><div className="relative aspect-video"><Image src={cover} alt={beat} fill className="object-cover" priority /></div><div className="space-y-4 p-6"><Detail label="BEAT" value={beat} /><Detail label="LICENSE" value={license} /><Detail label="DISPLAY PRICE" value={displayPrice ? formatEgp(displayPrice) : "CALCULATED AT SUBMISSION"} /><Detail label="CURRENCY" value="EGP" /><p className="pt-3 text-xs leading-6 text-zinc-600">The final amount is verified from the selected beat in the database when your order is created.</p></div></aside></form></div></main>;
 }
+
+function Field({ label, value, onChange, placeholder, type = "text" }) { return <label className="block"><span className="text-[9px] tracking-[0.25em] text-zinc-500">{label}</span><input type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-4 text-sm outline-none placeholder:text-zinc-700 focus:border-red-500/50" /></label>; }
+function Detail({ label, value }) { return <div className="flex items-center justify-between gap-5 border-b border-white/5 pb-3 last:border-0"><span className="text-[9px] tracking-[0.2em] text-zinc-600">{label}</span><span className="text-right text-sm text-zinc-200">{value}</span></div>; }
+export default function CheckoutPage() { return <Suspense fallback={<main className="min-h-screen bg-black p-10 text-center text-xs tracking-[0.3em] text-zinc-500">LOADING CHECKOUT...</main>}><CheckoutContent /></Suspense>; }

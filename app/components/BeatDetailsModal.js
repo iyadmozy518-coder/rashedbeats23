@@ -308,6 +308,7 @@ export default function BeatDetailsModal({ beat, onClose, onPlay }) {
                     }
 
                     const params = new URLSearchParams({
+                      beatId: beat.id,
                       beat: beat.title,
                       genre: beat.genre,
                       cover: beat.cover,

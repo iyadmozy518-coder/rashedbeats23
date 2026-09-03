@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 export default function BeatCard({
+  id,
   title,
   genre,
   bpm,
@@ -135,6 +136,7 @@ export default function BeatCard({
             type="button"
             onClick={() =>
               onDetails({
+                id,
                 title,
                 genre,
                 bpm,
