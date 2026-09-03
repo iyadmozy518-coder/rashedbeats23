@@ -4,21 +4,29 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+function formatEgp(value) {
+  if (value == null) {
+    return "NOT SET";
+  }
+
+  return `${Number(value).toLocaleString("en-US")} EGP`;
+}
+
 export default function BeatDetailsModal({ beat, onClose, onPlay }) {
   const router = useRouter();
 
   const [showLicenses, setShowLicenses] = useState(false);
   const [selectedLicense, setSelectedLicense] = useState("PREMIUM");
 
+  if (!beat) return null;
+
   const licensePrices = {
-    BASIC: 29,
-    PREMIUM: 59,
-    UNLIMITED: 99,
+    BASIC: beat.basicLicensePrice,
+    PREMIUM: beat.premiumLicensePrice,
+    UNLIMITED: beat.unlimitedLicensePrice,
   };
 
   const selectedPrice = licensePrices[selectedLicense];
-
-  if (!beat) return null;
 
   return (
     <div
@@ -245,7 +253,7 @@ export default function BeatDetailsModal({ beat, onClose, onPlay }) {
 
                 <LicenseCard
                   name="BASIC"
-                  price={29}
+                  price={licensePrices.BASIC}
                   description="MP3/WAV license for independent releases."
                   selected={selectedLicense === "BASIC"}
                   onClick={() => setSelectedLicense("BASIC")}
@@ -254,7 +262,7 @@ export default function BeatDetailsModal({ beat, onClose, onPlay }) {
 
                 <LicenseCard
                   name="PREMIUM"
-                  price={59}
+                  price={licensePrices.PREMIUM}
                   description="Extended commercial usage with high-quality files."
                   selected={selectedLicense === "PREMIUM"}
                   popular
@@ -264,7 +272,7 @@ export default function BeatDetailsModal({ beat, onClose, onPlay }) {
 
                 <LicenseCard
                   name="UNLIMITED"
-                  price={99}
+                  price={licensePrices.UNLIMITED}
                   description="Unlimited commercial use and distribution."
                   selected={selectedLicense === "UNLIMITED"}
                   onClick={() => setSelectedLicense("UNLIMITED")}
@@ -295,6 +303,10 @@ export default function BeatDetailsModal({ beat, onClose, onPlay }) {
                 <button
                   onClick={() => {
 
+                    if (selectedPrice == null) {
+                      return;
+                    }
+
                     const params = new URLSearchParams({
                       beat: beat.title,
                       genre: beat.genre,
@@ -306,9 +318,10 @@ export default function BeatDetailsModal({ beat, onClose, onPlay }) {
                     router.push(`/checkout?${params.toString()}`);
 
                   }}
-                  className="mt-4 w-full rounded-xl bg-white px-5 py-3.5 text-sm font-semibold tracking-wide text-black transition-all duration-300 hover:bg-zinc-200 hover:shadow-[0_0_30px_rgba(255,255,255,0.15)]"
+                  disabled={selectedPrice == null}
+                  className="mt-4 w-full rounded-xl bg-white px-5 py-3.5 text-sm font-semibold tracking-wide text-black transition-all duration-300 hover:bg-zinc-200 hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  CONTINUE — ${selectedPrice}
+                  CONTINUE — {formatEgp(selectedPrice)}
                 </button>
 
               </div>
@@ -452,7 +465,7 @@ function LicenseCard({
 
 
           <span className="text-sm font-medium text-zinc-300">
-            ${price}
+                  {formatEgp(price)}
           </span>
 
         </div>

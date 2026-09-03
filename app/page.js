@@ -65,6 +65,7 @@ export default function Home() {
         .from("beats")
         .select(
           "id, title, genre, bpm, key_name, price, cover_url, audio_url, description, mood"
+           + ", basic_license_price, premium_license_price, unlimited_license_price"
         )
         .eq("published", true)
         .order("created_at", { ascending: false });
@@ -87,6 +88,18 @@ export default function Home() {
         bpm: beat.bpm != null ? String(beat.bpm) : "",
         keyName: beat.key_name || "",
         price: beat.price != null ? String(beat.price) : "",
+        basicLicensePrice:
+          beat.basic_license_price != null
+            ? Number(beat.basic_license_price)
+            : null,
+        premiumLicensePrice:
+          beat.premium_license_price != null
+            ? Number(beat.premium_license_price)
+            : null,
+        unlimitedLicensePrice:
+          beat.unlimited_license_price != null
+            ? Number(beat.unlimited_license_price)
+            : null,
         cover: beat.cover_url || "",
         audio: beat.audio_url || "",
         description: beat.description || "",
@@ -282,6 +295,9 @@ export default function Home() {
                 bpm={beat.bpm}
                 keyName={beat.keyName}
                 price={beat.price}
+                basicLicensePrice={beat.basicLicensePrice}
+                premiumLicensePrice={beat.premiumLicensePrice}
+                unlimitedLicensePrice={beat.unlimitedLicensePrice}
                 cover={beat.cover}
                 audio={beat.audio}
                 description={beat.description}

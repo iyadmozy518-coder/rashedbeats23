@@ -5,6 +5,10 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 
+function formatEgp(value) {
+  return `${Number(value).toLocaleString("en-US")} EGP`;
+}
+
 function CheckoutContent() {
   const searchParams = useSearchParams();
 
@@ -12,7 +16,7 @@ function CheckoutContent() {
   const genre = searchParams.get("genre") || "UNKNOWN";
   const cover = searchParams.get("cover") || "/beats/after-dark.jpg";
   const license = searchParams.get("license") || "PREMIUM";
-  const price = searchParams.get("price") || "59";
+  const price = searchParams.get("price") || "3000";
 
   const [step, setStep] = useState(1);
 
@@ -399,7 +403,7 @@ function CheckoutContent() {
                   >
                     {processing
                       ? "PROCESSING..."
-                      : `PAY $${price}`}
+                      : `PAY ${formatEgp(price)}`}
                   </button>
 
                   <div className="mt-5 text-center text-[10px] tracking-wide text-zinc-600">
@@ -465,7 +469,7 @@ function CheckoutContent() {
                 </div>
 
                 <span className="text-sm text-zinc-300">
-                  ${price}
+                  {formatEgp(price)}
                 </span>
 
               </div>
@@ -507,7 +511,7 @@ function CheckoutContent() {
                 </span>
 
                 <span className="text-3xl font-bold">
-                  ${price}
+                  {formatEgp(price)}
                 </span>
 
               </div>
